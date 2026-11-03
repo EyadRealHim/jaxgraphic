@@ -25,7 +25,7 @@ license = {text = "MIT"}
 name = "jaxgraphic"
 readme = "README.md"
 requires-python = ">=3.12"
-version = "0.1.0"
+version = "0.1.01"
 
 [project.urls]
 Homepage = "https://github.com/EyadRealHim/jaxgraphic"
@@ -33,4 +33,4 @@ Issues = "https://github.com/EyadRealHim/jaxgraphic/issues"
 Repository = "https://github.com/EyadRealHim/jaxgraphic.git"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/jaxgraphic"]
+packages = ["jaxgraphic"]
