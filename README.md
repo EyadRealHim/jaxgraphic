@@ -1,6 +1,6 @@
 # jaxgraphic
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/EyadRealHim/jaxgraphic/blob/main/demo.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/EyadRealHim/jaxgraphic/blob/master/demo.ipynb)
 
 Fast 2D drawing on [JAX](https://github.com/jax-ml/jax): anti-aliased shapes and images
 rendered as planar `float32` arrays. Shapes are signed distance functions packaged as pytrees,
