@@ -1,98 +1,48 @@
-"""jaxgraphic: a tiny differentiable 2D drawing library built on JAX.
+"""jaxgraphic: fast 2D drawing on JAX.
 
-Shapes are signed distance functions; ``fill`` and ``stroke`` rasterize them
-with anti-aliasing onto ``(H, W, 3)`` float images. Everything is pure, so it
-works with ``jax.jit``, ``jax.vmap`` and ``jax.grad``.
+Draw shapes and images with anti-aliasing. Shapes are pytrees, so a whole batch of frames
+renders in one compiled call with plain ``jax.vmap``. Shapes are signed-distance-function pytrees; images are planar
+``(C, H, W)`` float arrays.
 
+    import jax, jax.numpy as jnp
     import jaxgraphic as jg
 
-    img = jg.new_canvas(256, 256, "#ffffff")
-    img = jg.fill(img, jg.circle((128, 128), 60), "#e63946")
-    img = jg.stroke(img, jg.box((128, 128), (140, 140), angle=0.4), "#1d3557", width=4)
-    jg.save_png(img, "out.png")
+    def scene(t):                                   # one frame
+        return (jg.Canvas.new(256, 256, "#ffffff")
+                .fill(jg.Circle((40 + 170 * t, 128), 40), "#e63946")
+                .stroke(jg.Box((128, 128), (200, 200), angle=t), "#1d3557", width=4))
 
-Conventions: coordinates are pixels with x to the right and y *down*; colors are
-``"#rrggbb"`` strings or ``(r, g, b)`` in ``[0, 1]``; images are ``float32``.
-See the README for a full API reference.
+    frames = jax.jit(jax.vmap(lambda t: jg.to_uint8(scene(t).img)))
+    video = frames(jnp.linspace(0.0, 1.0, 240))     # (240, 3, 256, 256) uint8
+
+Conventions: coordinates are pixels, x right and y *down*; colors are ``"#rrggbb"``
+strings or ``(r, g, b)`` in ``[0, 1]``. See the README for the API and speed guide.
 """
-
-from ._types import (
-    Array,
-    ArrayLike,
-    Color,
-    Image,
-    Point,
-    Scalar,
-    Shape,
-)
-from .core import (
-    Canvas,
-    coverage,
-    fill,
-    linear_gradient,
-    new_canvas,
-    pixel_grid,
-    rgb,
-    stroke,
-)
-from .io import save_png, to_uint8
-from .shapes import (
-    box,
-    circle,
-    ellipse,
-    intersect,
-    outline,
-    polygon,
-    regular_polygon,
-    rotate,
-    scale,
-    segment,
-    smooth_union,
-    star,
-    subtract,
-    translate,
-    triangle,
-    union,
-)
+from ._types import Array, ArrayLike, Color, Image, Point, Scalar  # noqa: F401
+from .canvas import Canvas
+from .convert import from_hwc, to_hwc, to_uint8
+from .images import draw_image
+from .paint import fill, fill_many, linear_gradient, stroke
+from .png import load_png, save_png
+from .raster import coords, coverage, new_canvas, rgb
+from .shapes import (Box, Circle, Ellipse, FnShape, Intersect, Outline, Polygon,
+                     RegularPolygon, Rotate, Scale, Segment, Shape, ShapeLike,
+                     SmoothUnion, Star, Subtract, Translate, Triangle, Union,
+                     as_shape)
 
 __all__ = [
     # types
-    "Array",
-    "ArrayLike",
+    "Array", "ArrayLike", "Color", "Image", "Point", "Scalar", "ShapeLike",
     # canvas & painting
-    "Canvas",
-    "Color",
-    "Image",
-    "Point",
-    "Scalar",
-    "Shape",
+    "Canvas", "draw_image", "fill", "fill_many", "linear_gradient", "stroke",
+    "coords", "coverage", "new_canvas", "rgb",
+    # conversion & PNG I/O
+    "from_hwc", "to_hwc", "to_uint8", "load_png", "save_png",
     # shapes
-    "box",
-    "circle",
-    "coverage",
-    "ellipse",
-    "fill",
-    # operations
-    "intersect",
-    "linear_gradient",
-    "new_canvas",
-    "outline",
-    "pixel_grid",
-    "polygon",
-    "regular_polygon",
-    "rgb",
-    "rotate",
-    # output
-    "save_png",
-    "scale",
-    "segment",
-    "smooth_union",
-    "star",
-    "stroke",
-    "subtract",
-    "to_uint8",
-    "translate",
-    "triangle",
-    "union",
+    "Shape", "FnShape", "as_shape", "Box", "Circle", "Ellipse", "Polygon",
+    "RegularPolygon", "Segment", "Star", "Triangle",
+    # combinators
+    "Intersect", "Outline", "Rotate", "Scale", "SmoothUnion", "Subtract",
+    "Translate", "Union",
 ]
-__version__ = "0.1.0"
+__version__ = "0.3.0"
